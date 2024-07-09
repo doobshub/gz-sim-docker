@@ -50,6 +50,7 @@ RUN git clone --recurse-submodules https://github.com/ArduPilot/ardupilot ${HOME
     && cd ${HOME_DIR}/ardupilot \
     && Tools/environment_install/install-prereqs-ubuntu.sh -y \
     && . ~/.profile \
+    && ./waf configure \
     && ./waf clean
 
 RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git ${HOME_DIR}/ardupilot_gazebo \
