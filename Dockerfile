@@ -4,7 +4,6 @@ FROM ros:${ROS_DISTRO}
 ARG USER=user
 ARG HOME_DIR=/home/${USER}
 
-
 ENV COLCON_WS=/root/colcon_ws
 ENV COLCON_WS_SRC=/root/colcon_ws/src
 ENV PYTHONWARNINGS="ignore:setup.py install is deprecated::setuptools.command.install"
@@ -39,6 +38,13 @@ RUN apt-get update -qq \
 RUN apt-get update \
     && apt-get install -y git gitk git-gui libgz-sim7-dev rapidjson-dev libopencv-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl \
     && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -ms /bin/bash ${USER} \
+    && usermod -aG sudo ${USER} \
+    && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+USER ${USER}
+WORKDIR ${HOME_DIR}
 
 RUN git clone --recurse-submodules https://github.com/ArduPilot/ardupilot ${HOME_DIR}/ardupilot \
     && cd ${HOME_DIR}/ardupilot \
@@ -84,6 +90,5 @@ RUN apt-get update \
     && apt-get install -y ros-${ROS_DISTRO}-mavros* \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /root
 
 CMD gz sim
