@@ -73,7 +73,7 @@ RUN mkdir -p ${HOME}/colcon_ws/src \
     && . /opt/ros/${ROS_DISTRO}/setup.sh \
     && colcon build
 
-RUN mkdir -p /root/ros2_ws/src \
+RUN mkdir -p ${HOME_DIR}/ros2_ws/src \
     && cd ${HOME_DIR}/ros2_ws/src \
     && git clone https://github.com/itskalvik/ros_sgp_tools.git \
     && cd ${HOME_DIR}/ros2_ws \
