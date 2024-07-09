@@ -91,6 +91,8 @@ RUN echo "export GZ_VERSION=garden" >> ~/.bashrc
 RUN echo "export GZ_SIM_SYSTEM_PLUGIN_PATH=$HOME/ardupilot_gazebo/build:${GZ_SIM_SYSTEM_PLUGIN_PATH}" >> ~/.bashrc
 RUN echo "export GZ_SIM_RESOURCE_PATH=$HOME/ardupilot_gazebo/models:$HOME/ardupilot_gazebo/worlds:$HOME/SITL_Models/Gazebo/models:$HOME/SITL_Models/Gazebo/worlds:$GZ_SIM_RESOURCE_PATH" >> ~/.bashrc
 
+USER root
+
 RUN apt-get update \
     && apt-get install -y ros-${ROS_DISTRO}-mavros* \
     && rm -rf /var/lib/apt/lists/*
