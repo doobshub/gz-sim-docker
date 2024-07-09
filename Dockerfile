@@ -33,10 +33,6 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update \
-    && apt-get install git \
-    && apt-get install gitk git-gui
-
-RUN apt-get update \
     && apt-get install -y git gitk git-gui libgz-sim7-dev rapidjson-dev libopencv-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl \
     && rm -rf /var/lib/apt/lists/*
 
