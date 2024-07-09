@@ -64,7 +64,9 @@ ENV GZ_SIM_RESOURCE_PATH=/root/ardupilot_gazebo/models:/root/ardupilot_gazebo/wo
 
 WORKDIR $HOME
 
-RUN source ros_entrypoint.sh
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
+    && echo "source ${COLCON_WS}/install/setup.bash" >> ~/.bashrc \
+    && echo "source ${HOME_DIR}/ros2_ws/install/setup.bash" >> ~/.bashrc
 
 RUN mkdir -p ${COLCON_WS_SRC}\
     && cd ${COLCON_WS}\
