@@ -1,6 +1,10 @@
 ARG ROS_DISTRO
 FROM ros:${ROS_DISTRO}
 
+ARG USER=user
+ARG HOME_DIR=/home/${USER}
+
+
 ENV COLCON_WS=/root/colcon_ws
 ENV COLCON_WS_SRC=/root/colcon_ws/src
 ENV PYTHONWARNINGS="ignore:setup.py install is deprecated::setuptools.command.install"
@@ -36,14 +40,14 @@ RUN apt-get update \
     && apt-get install -y git gitk git-gui libgz-sim7-dev rapidjson-dev libopencv-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone --recurse-submodules https://github.com/ArduPilot/ardupilot /root/ardupilot \
-    && cd /root/ardupilot \
+RUN git clone --recurse-submodules https://github.com/ArduPilot/ardupilot ${HOME_DIR}/ardupilot \
+    && cd ${HOME_DIR}/ardupilot \
     && Tools/environment_install/install-prereqs-ubuntu.sh -y \
     && . ~/.profile \
     && ./waf clean
 
-RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git /root/ardupilot_gazebo \
-    && cd /root/ardupilot_gazebo \
+RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git ${HOME_DIR}/ardupilot_gazebo \
+    && cd ${HOME_DIR}/ardupilot_gazebo \
     && mkdir build && cd build \
     && cmake .. && make
 
@@ -61,9 +65,9 @@ RUN mkdir -p ${COLCON_WS_SRC}\
     && colcon build
 
 RUN mkdir -p /root/ros2_ws/src \
-    && cd /root/ros2_ws/src \
+    && cd ${HOME_DIR}/ros2_ws/src \
     && git clone https://github.com/itskalvik/ros_sgp_tools.git \
-    && cd /root/ros2_ws \
+    && cd ${HOME_DIR}/ros2_ws \
     && colcon build \
     && echo "source $HOME/ros2_ws/install/setup.bash" >> ~/.bashrc \
     && source ~/.bashrc
