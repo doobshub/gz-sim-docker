@@ -68,9 +68,9 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
     && echo "source ${COLCON_WS}/install/setup.bash" >> ~/.bashrc \
     && echo "source ${HOME_DIR}/ros2_ws/install/setup.bash" >> ~/.bashrc
 
-RUN mkdir -p ${COLCON_WS_SRC}\
-    && cd ${COLCON_WS}\
-    && . /opt/ros/${ROS_DISTRO}/setup.sh\
+RUN mkdir -p ${HOME}/colcon_ws/src \
+    && cd ${HOME}/colcon_ws \
+    && . /opt/ros/${ROS_DISTRO}/setup.sh \
     && colcon build
 
 RUN mkdir -p /root/ros2_ws/src \
