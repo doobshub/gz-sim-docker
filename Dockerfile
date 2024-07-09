@@ -72,6 +72,8 @@ RUN mkdir -p ${HOME}/colcon_ws/src \
     && cd ${HOME}/colcon_ws \
     && . /opt/ros/${ROS_DISTRO}/setup.sh \
     && colcon build
+    
+SHELL ["/bin/bash", "-c"]
 
 RUN mkdir -p ${HOME_DIR}/ros2_ws/src \
     && cd ${HOME_DIR}/ros2_ws/src \
