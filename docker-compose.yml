@@ -10,7 +10,13 @@ services:
       args:
         ROS_DISTRO: humble
         GZ_VERSION: garden
-    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     environment: 
       - PYTHONUNBUFFERED=1 # important to show error messages if a ros service crashes!
       - DISPLAY # for UI
