@@ -96,6 +96,6 @@ RUN echo "export GZ_VERSION=garden" >> ~/.bashrc \
 
 RUN apt install ros-humble-mavros*
 
-gz sim -v4 -r r1_rover_runway.sdf
+RUN gz sim -v4 -r r1_rover_runway.sdf
 
 CMD gz sim
