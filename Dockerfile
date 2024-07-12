@@ -1,8 +1,8 @@
 ARG ROS_DISTRO
 FROM ros:${ROS_DISTRO}
 
-ARG USER=user
-ARG HOME_DIR=/home/${USER}
+#ARG USER=user
+#ARG HOME_DIR=/home/${USER}
 
 ENV COLCON_WS=/root/colcon_ws
 ENV COLCON_WS_SRC=/root/colcon_ws/src
@@ -39,63 +39,63 @@ RUN apt-get update \
     && apt-get install -y git gitk git-gui libgz-sim7-dev rapidjson-dev libopencv-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-bad gstreamer1.0-libav gstreamer1.0-gl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -ms /bin/bash ${USER} \
-    && usermod -aG sudo ${USER} \
-    && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+#RUN useradd -ms /bin/bash ${USER} \
+#    && usermod -aG sudo ${USER} \
+#    && echo "${USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-USER ${USER}
-WORKDIR ${HOME_DIR}
-
-RUN git clone --recurse-submodules https://github.com/ArduPilot/ardupilot ${HOME_DIR}/ardupilot \
-    && cd ${HOME_DIR}/ardupilot \
-    && Tools/environment_install/install-prereqs-ubuntu.sh -y \
-    && . ~/.profile \
-    && ./waf configure \
-    && ./waf clean
-
-RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git ${HOME_DIR}/ardupilot_gazebo \
-    && cd ${HOME_DIR}/ardupilot_gazebo \
-    && mkdir build && cd build \
-    && cmake .. && make
-
-# Set environment variables
-ENV GZ_SIM_SYSTEM_PLUGIN_PATH=/root/ardupilot_gazebo/build:$GZ_SIM_SYSTEM_PLUGIN_PATH
-ENV GZ_SIM_RESOURCE_PATH=/root/ardupilot_gazebo/models:/root/ardupilot_gazebo/worlds:$GZ_SIM_RESOURCE_PATH
-
-WORKDIR $HOME
-
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
-    && echo "source ${COLCON_WS}/install/setup.bash" >> ~/.bashrc \
-    && echo "source ${HOME_DIR}/ros2_ws/install/setup.bash" >> ~/.bashrc
+#USER ${USER}
+#WORKDIR ${HOME_DIR}
 
 RUN mkdir -p ${HOME}/colcon_ws/src \
     && cd ${HOME}/colcon_ws \
     && . /opt/ros/${ROS_DISTRO}/setup.sh \
     && colcon build
-    
-SHELL ["/bin/bash", "-c"]
 
-RUN mkdir -p ${HOME_DIR}/ros2_ws/src \
-    && cd ${HOME_DIR}/ros2_ws/src \
-    # && git clone https://github.com/itskalvik/ros_sgp_tools.git \
-    && cd ${HOME_DIR}/ros2_ws \
-    && colcon build \
-    && echo "source $HOME/ros2_ws/install/setup.bash" >> ~/.bashrc \
+RUN mkdir -p ~/ros2_ws/src \
+    cd ~/ros2_ws/ \
+    colcon build \
+    echo "source $HOME/ros2_ws/install/setup.bash" >> ~/.bashrc \
+    source ~/.bashrc
+
+RUN git clone --recurse-submodules https://github.com/ArduPilot/ardupilot \
+    && cd ~/ardupilot\
+    && USER=nobody Tools/environment_install/install-prereqs-ubuntu.sh -y \
+    && . ~/.profile 
+
+RUN export GZ_VERSION=garden \
+    && sudo bash -c 'wget https://raw.githubusercontent.com/osrf/osrf-rosdep/master/gz/00-gazebo.list -O /etc/ros/rosdep/sources.list.d/00-gazebo.list' \
+    && rosdep update \
+    && rosdep resolve gz-garden \
+    %% cd ~/ros2_ws/ \
+    && rosdep install --from-paths src --ignore-src -y
+
+RUN git clone https://github.com/ArduPilot/ardupilot_gazebo.git \
+    && cd ~/ardupilot_gazebo \
+    && mkdir build && cd build \
+    && cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    && make -j4
+
+RUN export GZ_SIM_SYSTEM_PLUGIN_PATH=$HOME/ardupilot_gazebo/build:$GZ_SIM_SYSTEM_PLUGIN_PATH \
+    && export GZ_SIM_RESOURCE_PATH=$HOME/ardupilot_gazebo/models:$HOME/ardupilot_gazebo/worlds:$GZ_SIM_RESOURCE_PATH \
+    && echo 'export GZ_SIM_SYSTEM_PLUGIN_PATH=$HOME/ardupilot_gazebo/build:${GZ_SIM_SYSTEM_PLUGIN_PATH}' >> ~/.bashrc \
+    echo 'export GZ_SIM_RESOURCE_PATH=$HOME/ardupilot_gazebo/models:$HOME/ardupilot_gazebo/worlds:${GZ_SIM_RESOURCE_PATH}' >> ~/.bashrc \
     && source ~/.bashrc
-    
+
 WORKDIR $HOME
 
 RUN git clone https://github.com/ArduPilot/SITL_Models.git
 
-RUN echo "export GZ_VERSION=garden" >> ~/.bashrc
-RUN echo "export GZ_SIM_SYSTEM_PLUGIN_PATH=$HOME/ardupilot_gazebo/build:${GZ_SIM_SYSTEM_PLUGIN_PATH}" >> ~/.bashrc
-RUN echo "export GZ_SIM_RESOURCE_PATH=$HOME/ardupilot_gazebo/models:$HOME/ardupilot_gazebo/worlds:$HOME/SITL_Models/Gazebo/models:$HOME/SITL_Models/Gazebo/worlds:$GZ_SIM_RESOURCE_PATH" >> ~/.bashrc
+#RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
+#    && echo "source ${COLCON_WS}/install/setup.bash" >> ~/.bashrc \
+#    && echo "source ${HOME_DIR}/ros2_ws/install/setup.bash" >> ~/.bashrc
 
-USER root
 
-RUN apt-get update \
-    && apt-get install -y ros-${ROS_DISTRO}-mavros* \
-    && rm -rf /var/lib/apt/lists/*
+RUN echo "export GZ_VERSION=garden" >> ~/.bashrc \
+    && echo "export GZ_SIM_SYSTEM_PLUGIN_PATH=$HOME/ardupilot_gazebo/build:${GZ_SIM_SYSTEM_PLUGIN_PATH}" >> ~/.bashrc \
+    && echo "export GZ_SIM_RESOURCE_PATH=$HOME/ardupilot_gazebo/models:$HOME/ardupilot_gazebo/worlds:$HOME/SITL_Models/Gazebo/models:$HOME/SITL_Models/Gazebo/worlds:$GZ_SIM_RESOURCE_PATH" >> ~/.bashrc
 
+RUN apt install ros-humble-mavros*
+
+gz sim -v4 -r r1_rover_runway.sdf
 
 CMD gz sim
